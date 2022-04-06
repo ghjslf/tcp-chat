@@ -1,6 +1,7 @@
 import socket
 import sys
 import threading
+import logging
 
 
 def broadcast(connection, address, message, clients):
@@ -22,16 +23,22 @@ def client_processing(connection, address, clients):
         except:
             continue
         else:
-            if message:
-                print(f'{address}: {message}')
-                broadcast(connection, address, message, clients)
-            else:
+            if not message:
                 if connection in clients:
                     clients.remove(connection)
+            else:
+                direct = None
+                if direct:
+                    pass
+                else:
+                    logging.info(f'{address}: {message}')
+                    print(f'{address}: {message}')
+                    broadcast(connection, address, message, clients)
 
 
+logging.basicConfig(filename="app.log", level=logging.INFO)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # ???
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 if len(sys.argv) != 3:
     print('2 additional arguments are expected: ip, port')
@@ -47,5 +54,5 @@ while True:
     clients.append(connection)
     print(f'{address} connected')
 
-    threading.Thread(target=client_processing, args=(connection, address, clients)).start()
+    threading.Thread(target=client_processing, args=(connection, address, clients), daemon=True).start()
 
