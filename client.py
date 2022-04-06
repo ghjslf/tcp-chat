@@ -6,10 +6,16 @@ import threading
 def listen():
     while True:
         try:
-            print(client.recv(2048).decode('utf_8'))
+            message = client.recv(2048).decode('utf_8')
         except:
             client.close()
             break
+        else:
+            print(message)
+            if message == 'welcome':
+                continue
+            if message != 'done!' and message != 'message delivery...':
+                client.send('0kDIzkDOKd77'.encode('utf_8'))
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

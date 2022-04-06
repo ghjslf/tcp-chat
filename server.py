@@ -12,6 +12,22 @@ def broadcast(connection, address, message, clients):
             except:
                 client.close()
                 clients.remove(connection)
+        else:
+            try:
+                client.send('message delivery...'.encode('utf_8'))
+            except:
+                client.close()
+                clients.remove(connection)
+
+
+def successful_delivery_notification_broadcast(connection, clients):
+    for client in clients:
+        if client != connection:
+            try:
+                client.send('done!'.encode('utf_8'))
+            except:
+                client.close()
+                clients.remove(connection)
 
 
 def client_processing(connection, address, clients):
@@ -27,16 +43,26 @@ def client_processing(connection, address, clients):
                 if connection in clients:
                     clients.remove(connection)
             else:
-                direct = None
-                if direct:
-                    pass
+                print(f'{address}: {message}')
+                if message != '0kDIzkDOKd77':
+                    direct = None # TODO парсинг и захват адреса или псевдонима из сообщения прим. @anon
+                    if direct:
+                        pass # TODO отправка личного сообщения
+                    else:
+                        logging.info(f'{address}: {message}')
+                        broadcast(connection, address, message, clients)
                 else:
-                    logging.info(f'{address}: {message}')
-                    print(f'{address}: {message}')
-                    broadcast(connection, address, message, clients)
+                    try:
+                        # TODO пока адреса или псевдонимы не хранятся с сокетами клиентов получатель оповещает о получении сообщения всех клиентов кроме себя
+                        # если в чате 2 клиента то оповещение всех кроме отправителя это нормально
+                        successful_delivery_notification_broadcast(connection, clients)
+                    except:
+                        connection.close()
+                        clients.remove(connection)
 
 
 logging.basicConfig(filename="app.log", level=logging.INFO)
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
