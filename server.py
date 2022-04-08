@@ -73,7 +73,7 @@ if len(sys.argv) != 3:
 server.bind((str(sys.argv[1]), int(sys.argv[2])))
 server.listen(16)
 
-clients = []
+clients = {}
 
 while True:
     connection, address = server.accept()
